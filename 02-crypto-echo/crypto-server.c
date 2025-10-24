@@ -245,11 +245,194 @@
  * 
  * NOTE: If addr is "0.0.0.0", use INADDR_ANY instead of inet_pton()
  */
+// Forward declarations
+int service_client_loop(int client_sock);
+int build_response(crypto_msg_t *request, crypto_msg_t *response, crypto_key_t *client_key, crypto_key_t *server_key);
 void start_server(const char* addr, int port) {
-    printf("Student TODO: Implement start_server()\n");
-    printf("  - Create TCP socket\n");
-    printf("  - Bind to %s:%d\n", addr, port);
-    printf("  - Listen for connections (BACKLOG = %d)\n", BACKLOG);
-    printf("  - Accept and handle clients in a loop\n");
-    printf("  - Close socket on shutdown\n");
+    int server_sock, client_sock;
+    struct sockaddr_in server_addr, client_addr;
+    socklen_t client_len = sizeof(client_addr);
+    int reuse = 1;
+    char client_ip[INET_ADDRSTRLEN];
+    int rc;
+
+    // Create TCP socket
+    server_sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_sock < 0) {
+        perror("Error creating socket");
+        exit(EXIT_FAILURE);
+    }
+
+    // Allow socket reuse (helps during development)
+    if (setsockopt(server_sock, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
+        perror("Error setting SO_REUSEADDR");
+        close(server_sock);
+        exit(EXIT_FAILURE);
+    }
+
+    //Configure server address structure
+    memset(&server_addr, 0, sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(port);
+
+    if (strcmp(addr, "0.0.0.0") == 0) {
+        server_addr.sin_addr.s_addr = INADDR_ANY;  // Bind to all interfaces
+    } else {
+        if (inet_pton(AF_INET, addr, &server_addr.sin_addr) <= 0) {
+            fprintf(stderr, "Error: Invalid address %s\n", addr);
+            close(server_sock);
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    // Bind socket
+    if (bind(server_sock, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
+        perror("Error binding socket");
+        close(server_sock);
+        exit(EXIT_FAILURE);
+    }
+
+    //Start listening for connections
+    if (listen(server_sock, BACKLOG) < 0) {
+        perror("Error listening on socket");
+        close(server_sock);
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Server listening on %s:%d\n", addr, port);
+    printf("Waiting for client connections...\n");
+
+    // Main server loop
+    while (1) {
+        client_sock = accept(server_sock, (struct sockaddr*)&client_addr, &client_len);
+        if (client_sock < 0) {
+            perror("Error accepting client connection");
+            continue;  // Try again if one accept fails
+        }
+
+        // Get and print client IP address
+        inet_ntop(AF_INET, &client_addr.sin_addr, client_ip, sizeof(client_ip));
+        printf("Client connected from %s:%d\n", client_ip, ntohs(client_addr.sin_port));
+
+        // Handle client in service loop
+        rc = service_client_loop(client_sock);
+
+        // Close client connection
+        close(client_sock);
+        printf("Client from %s disconnected.\n\n", client_ip);
+
+        if (rc == RC_CLIENT_REQ_SERVER_EXIT) {
+            printf("Client requested server shutdown.\n");
+            break;
+        }
+    }
+
+    // Cleanup and close server socket
+    close(server_sock);
+    printf("Server shutdown complete.\n");
+}
+
+int service_client_loop(int client_sock) {
+    uint8_t recv_buf[MAX_MSG_SIZE];
+    uint8_t send_buf[MAX_MSG_SIZE];
+    ssize_t bytes_received;
+    crypto_msg_t *request = (crypto_msg_t *)recv_buf;
+    crypto_msg_t *response = (crypto_msg_t *)send_buf;
+    crypto_key_t client_key = NULL_CRYPTO_KEY;
+    crypto_key_t server_key = NULL_CRYPTO_KEY;
+
+    while (1) {
+        // Receive message from client
+        bytes_received = recv(client_sock, recv_buf, sizeof(recv_buf), 0);
+        if (bytes_received == 0) {
+            printf("Client disconnected.\n");
+            return RC_CLIENT_EXITED;
+        }
+        if (bytes_received < 0) {
+            perror("Error receiving data from client");
+            return RC_CLIENT_EXITED;
+        }
+
+        // Print incoming message for debugging
+        print_msg_info(request, server_key, SERVER_MODE);
+
+        // Handle special shutdown command
+        if (request->header.msg_type == MSG_CMD_SERVER_STOP) {
+            printf("Client requested server shutdown.\n");
+            return RC_CLIENT_REQ_SERVER_EXIT;
+        }
+
+        // Build response message
+        int resp_size = build_response(request, response, &client_key, &server_key);
+
+        // Only send response if payload exists
+        if (resp_size > 0 && request->header.msg_type != MSG_CMD_CLIENT_STOP) {
+            send(client_sock, response, resp_size, 0);
+            print_msg_info(response, server_key, SERVER_MODE);
+        }
+
+        // If client asked to exit, stop service loop
+        if (request->header.msg_type == MSG_CMD_CLIENT_STOP) {
+            printf("Client requested disconnect.\n");
+            return RC_CLIENT_EXITED;
+        }
+    }
+
+    return RC_OK;
+}
+
+int build_response(crypto_msg_t *request, crypto_msg_t *response,
+                   crypto_key_t *client_key, crypto_key_t *server_key) {
+
+    response->header.direction = DIR_RESPONSE;
+    response->header.msg_type  = request->header.msg_type;
+    int payload_len = 0;
+
+    switch (request->header.msg_type) {
+
+        case MSG_KEY_EXCHANGE:
+            gen_key_pair(server_key, client_key);
+            memcpy(response->payload, client_key, sizeof(crypto_key_t));
+            payload_len = sizeof(crypto_key_t);
+            printf("Key exchange complete. Server key=0x%04x, Client key=0x%04x\n",
+                   *server_key, *client_key);
+            break;
+
+        case MSG_DATA: {
+            char msg[256];
+            snprintf(msg, sizeof(msg), "echo %.*s", request->header.payload_len, request->payload);
+            payload_len = strlen(msg);
+            memcpy(response->payload, msg, payload_len);
+            break;
+        }
+
+        case MSG_ENCRYPTED_DATA: {
+            uint8_t decrypted[256], re_encrypted[256];
+            int dec_len = decrypt_string(*server_key, decrypted, request->payload, request->header.payload_len);
+            decrypted[dec_len] = '\0';
+            printf("Decrypted: %s\n", decrypted);
+
+            char echo_msg[256];
+            snprintf(echo_msg, sizeof(echo_msg), "echo %s", decrypted);
+
+            int enc_len = encrypt_string(*server_key, re_encrypted,
+                                         (uint8_t *)echo_msg, strlen(echo_msg));
+            memcpy(response->payload, re_encrypted, enc_len);
+            payload_len = enc_len;
+            break;
+        }
+
+        case MSG_CMD_CLIENT_STOP:
+        case MSG_CMD_SERVER_STOP:
+            payload_len = 0;
+            break;
+
+        default:
+            printf("Unknown message type: %d\n", request->header.msg_type);
+            payload_len = 0;
+            break;
+    }
+
+    response->header.payload_len = payload_len;
+    return sizeof(crypto_pdu_t) + payload_len;
 }

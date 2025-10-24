@@ -182,7 +182,7 @@ int gen_key_pair(crypto_key_t *key1, crypto_key_t *key2);
  *       // cipher now contains encrypted data
  *   }
  */
-int encrypt(crypto_key_t key, void *encrypted_text, void *clear_text, size_t len);
+int encrypt_bytes(crypto_key_t key, void *encrypted_text, void *clear_text, size_t len);
 
 /**
  * FUNCTION: decrypt()

@@ -1,0 +1,45 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     crypto-echo
+relocations:
+  - { offset: 0x26, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x0, symBinAddr: 0x1000040D8, symSize: 0x468 }
+  - { offset: 0x3F, size: 0x8, addend: 0x0, symName: _server_sockfd, symObjAddr: 0x9C4, symBinAddr: 0x10000C000, symSize: 0x0 }
+  - { offset: 0x5B, size: 0x8, addend: 0x0, symName: _client_sockfd, symObjAddr: 0x9C8, symBinAddr: 0x10000C004, symSize: 0x0 }
+  - { offset: 0x70, size: 0x8, addend: 0x0, symName: _client_exit_requested, symObjAddr: 0x2358, symBinAddr: 0x10000C008, symSize: 0x0 }
+  - { offset: 0x10A, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x0, symBinAddr: 0x1000040D8, symSize: 0x468 }
+  - { offset: 0x194, size: 0x8, addend: 0x0, symName: _signal_handler, symObjAddr: 0x468, symBinAddr: 0x100004540, symSize: 0xA4 }
+  - { offset: 0x1B8, size: 0x8, addend: 0x0, symName: _print_usage, symObjAddr: 0x50C, symBinAddr: 0x1000045E4, symSize: 0x1C8 }
+  - { offset: 0x1DC, size: 0x8, addend: 0x0, symName: _client_signal_handler, symObjAddr: 0x6D4, symBinAddr: 0x1000047AC, symSize: 0x78 }
+  - { offset: 0x200, size: 0x8, addend: 0x0, symName: _netmsg_from_cstr, symObjAddr: 0x74C, symBinAddr: 0x100004824, symSize: 0x104 }
+  - { offset: 0x26E, size: 0x8, addend: 0x0, symName: __OSSwapInt16, symObjAddr: 0x850, symBinAddr: 0x100004928, symSize: 0x24 }
+  - { offset: 0x296, size: 0x8, addend: 0x0, symName: _extract_msg_data, symObjAddr: 0x874, symBinAddr: 0x10000494C, symSize: 0x150 }
+  - { offset: 0x35B, size: 0x8, addend: 0x0, symName: _gen_key_pair, symObjAddr: 0x0, symBinAddr: 0x100004A9C, symSize: 0x184 }
+  - { offset: 0x382, size: 0x8, addend: 0x0, symName: _seeded, symObjAddr: 0x3740, symBinAddr: 0x10000C00C, symSize: 0x0 }
+  - { offset: 0x39E, size: 0x8, addend: 0x0, symName: _alphabet, symObjAddr: 0x150C, symBinAddr: 0x100007DFD, symSize: 0x0 }
+  - { offset: 0x3C4, size: 0x8, addend: 0x0, symName: _ascii_to_index, symObjAddr: 0x154C, symBinAddr: 0x100007E3D, symSize: 0x0 }
+  - { offset: 0x420, size: 0x8, addend: 0x0, symName: _gen_key_pair, symObjAddr: 0x0, symBinAddr: 0x100004A9C, symSize: 0x184 }
+  - { offset: 0x495, size: 0x8, addend: 0x0, symName: _generate_single_keypair, symObjAddr: 0x184, symBinAddr: 0x100004C20, symSize: 0xA4 }
+  - { offset: 0x4E8, size: 0x8, addend: 0x0, symName: _encrypt_bytes, symObjAddr: 0x228, symBinAddr: 0x100004CC4, symSize: 0x124 }
+  - { offset: 0x589, size: 0x8, addend: 0x0, symName: _decrypt, symObjAddr: 0x34C, symBinAddr: 0x100004DE8, symSize: 0x120 }
+  - { offset: 0x62A, size: 0x8, addend: 0x0, symName: _print_encrypted_string, symObjAddr: 0x46C, symBinAddr: 0x100004F08, symSize: 0x128 }
+  - { offset: 0x69A, size: 0x8, addend: 0x0, symName: _string_to_bytes, symObjAddr: 0x594, symBinAddr: 0x100005030, symSize: 0xE8 }
+  - { offset: 0x71C, size: 0x8, addend: 0x0, symName: _bytes_to_string, symObjAddr: 0x67C, symBinAddr: 0x100005118, symSize: 0xE8 }
+  - { offset: 0x781, size: 0x8, addend: 0x0, symName: _encrypt_string, symObjAddr: 0x764, symBinAddr: 0x100005200, symSize: 0x114 }
+  - { offset: 0x805, size: 0x8, addend: 0x0, symName: _decrypt_string, symObjAddr: 0x878, symBinAddr: 0x100005314, symSize: 0xF4 }
+  - { offset: 0x87A, size: 0x8, addend: 0x0, symName: _printable_encrypted_string, symObjAddr: 0x96C, symBinAddr: 0x100005408, symSize: 0xE4 }
+  - { offset: 0x8DF, size: 0x8, addend: 0x0, symName: _print_msg_info, symObjAddr: 0xA50, symBinAddr: 0x1000054EC, symSize: 0x520 }
+  - { offset: 0x96C, size: 0x8, addend: 0x0, symName: _get_valid_keys, symObjAddr: 0xFC0, symBinAddr: 0x100005A5C, symSize: 0xC4 }
+  - { offset: 0x9CC, size: 0x8, addend: 0x0, symName: _find_inverse, symObjAddr: 0x1084, symBinAddr: 0x100005B20, symSize: 0x88 }
+  - { offset: 0xA10, size: 0x8, addend: 0x0, symName: _is_valid_key, symObjAddr: 0x110C, symBinAddr: 0x100005BA8, symSize: 0x68 }
+  - { offset: 0xB0A, size: 0x8, addend: 0x0, symName: _get_command, symObjAddr: 0x0, symBinAddr: 0x100005C10, symSize: 0x254 }
+  - { offset: 0xBDE, size: 0x8, addend: 0x0, symName: _get_command, symObjAddr: 0x0, symBinAddr: 0x100005C10, symSize: 0x254 }
+  - { offset: 0xC22, size: 0x8, addend: 0x0, symName: _start_client, symObjAddr: 0x2D0, symBinAddr: 0x100005EE0, symSize: 0x1B0 }
+  - { offset: 0xC75, size: 0x8, addend: 0x0, symName: __OSSwapInt16, symObjAddr: 0x480, symBinAddr: 0x100006090, symSize: 0x24 }
+  - { offset: 0xC9D, size: 0x8, addend: 0x0, symName: _client_loop, symObjAddr: 0x4A4, symBinAddr: 0x1000060B4, symSize: 0x2FC }
+  - { offset: 0xD9F, size: 0x8, addend: 0x0, symName: _build_packet, symObjAddr: 0x7A0, symBinAddr: 0x1000063B0, symSize: 0x1D0 }
+  - { offset: 0xF6F, size: 0x8, addend: 0x0, symName: _start_server, symObjAddr: 0x0, symBinAddr: 0x10000659C, symSize: 0x33C }
+  - { offset: 0x1056, size: 0x8, addend: 0x0, symName: _start_server, symObjAddr: 0x0, symBinAddr: 0x10000659C, symSize: 0x33C }
+  - { offset: 0x10FB, size: 0x8, addend: 0x0, symName: __OSSwapInt16, symObjAddr: 0x33C, symBinAddr: 0x1000068D8, symSize: 0x24 }
+  - { offset: 0x1123, size: 0x8, addend: 0x0, symName: _service_client_loop, symObjAddr: 0x360, symBinAddr: 0x1000068FC, symSize: 0x1D4 }
+  - { offset: 0x11D4, size: 0x8, addend: 0x0, symName: _build_response, symObjAddr: 0x534, symBinAddr: 0x100006AD0, symSize: 0x2B0 }
+...

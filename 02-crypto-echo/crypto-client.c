@@ -187,13 +187,6 @@
  *   addr - Server IP address (e.g., "127.0.0.1")
  *   port - Server port number (e.g., 1234)
  */
-void start_client(const char* addr, int port) {
-    printf("Student TODO: Implement start_client()\n");
-    printf("  - Create TCP socket\n");
-    printf("  - Connect to %s:%d\n", addr, port);
-    printf("  - Implement communication loop\n");
-    printf("  - Close socket when done\n");
-}
 
 
 /* =============================================================================
@@ -230,6 +223,9 @@ void start_client(const char* addr, int port) {
  *   - For commands without data (like '#'), cmd_line will be NULL
  *   - For '!' commands, cmd_line points to text AFTER the '!' character
  */
+int client_loop(int sockfd);
+int build_packet(const msg_cmd_t *cmd, crypto_msg_t *pdu, crypto_key_t key);
+
 int get_command(char *cmd_buff, size_t cmd_buff_sz, msg_cmd_t *msg_cmd)
 {
     if ((cmd_buff == NULL) || (cmd_buff_sz == 0)) return CMD_NO_EXEC;
@@ -300,4 +296,148 @@ int get_command(char *cmd_buff, size_t cmd_buff_sz, msg_cmd_t *msg_cmd)
     }
     
     return CMD_NO_EXEC;
+}
+
+void start_client(const char* addr, int port) {
+    int sockfd;
+    struct sockaddr_in server_addr;
+
+    // Create TCP socket
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd < 0) {
+        perror("Error creating socket");
+        exit(EXIT_FAILURE);
+    }
+
+    //Configure server
+    memset(&server_addr, 0, sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(port);
+
+    // Convert IP to binary 
+    if (inet_pton(AF_INET, addr, &server_addr.sin_addr) <= 0) {
+        fprintf(stderr, "Error: Invalid address %s\n", addr);
+        close(sockfd);
+        exit(EXIT_FAILURE);
+    }
+
+    // Connect to server
+    if (connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
+        perror("Error connecting to server");
+        close(sockfd);
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Connected to server at %s:%d\n", addr, port);
+    printf("Type messages to send to server.\n");
+    printf("Press Ctrl+C to exit at any time.\n");
+
+    // Run client communication loop
+    client_loop(sockfd);
+    close(sockfd);
+    printf("Disconnected from server.\n");
+}
+
+int client_loop(int sockfd) {
+    uint8_t send_buf[MAX_MSG_SIZE];
+    uint8_t recv_buf[MAX_MSG_SIZE];
+    crypto_msg_t *request = (crypto_msg_t *)send_buf;
+    crypto_msg_t *response = (crypto_msg_t *)recv_buf;
+    crypto_key_t session_key = NULL_CRYPTO_KEY;
+    msg_cmd_t cmd;
+    char input_buffer[MAX_MSG_DATA_SIZE];
+    ssize_t bytes_received;
+
+    while (1) {
+        // Get command from user
+        int result = get_command(input_buffer, sizeof(input_buffer), &cmd);
+        if (result != CMD_EXECUTE) continue;  // skip help or invalid input
+
+        // Build PDU from command
+        int send_len = build_packet(&cmd, request, session_key);
+        if (send_len <= 0) {
+            printf("[Error] Failed to build packet.\n");
+            continue;
+        }
+
+        print_msg_info(request, session_key, CLIENT_MODE);
+
+        // Send PDU to server
+        if (send(sockfd, request, send_len, 0) < 0) {
+            perror("Error sending message");
+            break;
+        }
+
+        // Handle exit commands
+        if (cmd.cmd_id == MSG_CMD_CLIENT_STOP || cmd.cmd_id == MSG_CMD_SERVER_STOP) {
+            printf("Exit command sent. Closing client...\n");
+            break;
+        }
+
+        // Receive response from server
+        bytes_received = recv(sockfd, recv_buf, sizeof(recv_buf), 0);
+        if (bytes_received == 0) {
+            printf("Server closed the connection.\n");
+            break;
+        }
+        if (bytes_received < 0) {
+            perror("Error receiving response");
+            break;
+        }
+        print_msg_info(response, session_key, CLIENT_MODE);
+
+        // Process response
+        switch (response->header.msg_type) {
+            case MSG_KEY_EXCHANGE:
+                memcpy(&session_key, response->payload, sizeof(crypto_key_t));
+                printf("Session key established: 0x%04x\n", session_key);
+                break;
+            case MSG_DATA:
+                printf("Server: %.*s\n", response->header.payload_len, response->payload);
+                break;
+            case MSG_ENCRYPTED_DATA: {
+                uint8_t decrypted[MAX_MSG_DATA_SIZE];
+                int dec_len = decrypt_string(session_key, decrypted, response->payload, response->header.payload_len);
+                decrypted[dec_len] = '\0';
+                printf("Server (decrypted): %s\n", decrypted);
+                break;
+            }
+            default:
+                printf("[Unknown response type: %d]\n", response->header.msg_type);
+                break;
+        }
+    }
+    return RC_OK;
+}
+
+int build_packet(const msg_cmd_t *cmd, crypto_msg_t *pdu, crypto_key_t key) {
+    if (!cmd || !pdu) return -1;
+    pdu->header.msg_type = cmd->cmd_id;
+    pdu->header.direction = DIR_REQUEST;
+    int payload_len = 0;
+    switch (cmd->cmd_id) {
+        case MSG_DATA:
+            if (cmd->cmd_line) {
+                payload_len = strlen(cmd->cmd_line);
+                memcpy(pdu->payload, cmd->cmd_line, payload_len);
+            }
+            break;
+        case MSG_ENCRYPTED_DATA:
+            if (key == NULL_CRYPTO_KEY) {
+                printf("[Error] No session key. Use '#' for key exchange first.\n");
+                return -1;
+            }
+            payload_len = encrypt_string(key, pdu->payload, (uint8_t*)cmd->cmd_line, strlen(cmd->cmd_line));
+            break;
+        case MSG_KEY_EXCHANGE:
+        case MSG_CMD_CLIENT_STOP:
+        case MSG_CMD_SERVER_STOP:
+            payload_len = 0;
+            break;
+        default:
+            printf("[Error] Unknown command ID: %d\n", cmd->cmd_id);
+            return -1;
+    }
+    pdu->header.payload_len = payload_len;
+    return sizeof(crypto_pdu_t) + payload_len;
 }
