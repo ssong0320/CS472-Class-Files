@@ -33,6 +33,8 @@ void print_usage(char *exe_name){
 int process_request(const char *host, uint16_t port, char *resource){
     int sock;
     int total_bytes;
+    int bytes_recvd;
+    char *request;
 
     sock = socket_connect(host, port);
     if(sock < 0) return sock;
@@ -56,6 +58,32 @@ int process_request(const char *host, uint16_t port, char *resource){
     //    from the server, so why you are looping around, make sure to
     //    accumulate all of the data received and return this value. 
     //---------------------------------------------------------------------------------
+
+    // generate HTTP GET request with Connection: Close
+    request = generate_cc_request(host, port, resource);
+
+    // send the request
+    ssize_t bytes_sent = send(sock, request, strlen(request), 0);
+    if (bytes_sent < 0) {
+        perror("send failed");
+        close(sock);
+        return -1;
+    }
+
+    // recieve loop until server closes connection
+    total_bytes = 0;
+    while (1) {
+        bytes_recvd = recv(sock, recv_buff, BUFF_SZ, 0);
+        if (bytes_recvd <= 0) {
+            // recv() returns 0 or negative when the server closes or error occurs
+            break;
+        }
+
+        // Print the bytes we received
+        printf("%.*s", bytes_recvd, recv_buff);
+
+        total_bytes += bytes_recvd;
+    }
 
     close(sock);
     return total_bytes;

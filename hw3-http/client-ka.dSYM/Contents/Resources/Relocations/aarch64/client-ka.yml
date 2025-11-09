@@ -1,0 +1,24 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     client-ka
+relocations:
+  - { offset: 0x26, size: 0x8, addend: 0x0, symName: _generate_cc_request, symObjAddr: 0x0, symBinAddr: 0x100002D14, symSize: 0x11C }
+  - { offset: 0x33, size: 0x8, addend: 0x0, symName: _generate_cc_request, symObjAddr: 0x0, symBinAddr: 0x100002D14, symSize: 0x11C }
+  - { offset: 0x58, size: 0x8, addend: 0x0, symName: _generate_cc_request.req, symObjAddr: 0x1A3B, symBinAddr: 0x100008000, symSize: 0x0 }
+  - { offset: 0xC1, size: 0x8, addend: 0x0, symName: _recv_buff, symBinAddr: 0x100008200, symSize: 0x0 }
+  - { offset: 0xDC, size: 0x8, addend: 0x0, symName: _print_usage, symObjAddr: 0x11C, symBinAddr: 0x100002E30, symSize: 0x70 }
+  - { offset: 0x100, size: 0x8, addend: 0x0, symName: _reopen_socket, symObjAddr: 0x18C, symBinAddr: 0x100002EA0, symSize: 0xD0 }
+  - { offset: 0x160, size: 0x8, addend: 0x0, symName: _server_connect, symObjAddr: 0x25C, symBinAddr: 0x100002F70, symSize: 0x2C }
+  - { offset: 0x196, size: 0x8, addend: 0x0, symName: _server_disconnect, symObjAddr: 0x288, symBinAddr: 0x100002F9C, symSize: 0x24 }
+  - { offset: 0x1BA, size: 0x8, addend: 0x0, symName: _submit_request, symObjAddr: 0x2AC, symBinAddr: 0x100002FC0, symSize: 0x3A8 }
+  - { offset: 0x28A, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x654, symBinAddr: 0x100003368, symSize: 0x1CC }
+  - { offset: 0x371, size: 0x8, addend: 0x0, symName: _strcasestr, symObjAddr: 0x0, symBinAddr: 0x100003534, symSize: 0xF4 }
+  - { offset: 0x3CC, size: 0x8, addend: 0x0, symName: _strcasestr, symObjAddr: 0x0, symBinAddr: 0x100003534, symSize: 0xF4 }
+  - { offset: 0x42C, size: 0x8, addend: 0x0, symName: _strnstr, symObjAddr: 0xF4, symBinAddr: 0x100003628, symSize: 0x124 }
+  - { offset: 0x49A, size: 0x8, addend: 0x0, symName: _socket_connect, symObjAddr: 0x218, symBinAddr: 0x10000374C, symSize: 0x170 }
+  - { offset: 0x4FA, size: 0x8, addend: 0x0, symName: __OSSwapInt16, symObjAddr: 0x388, symBinAddr: 0x1000038BC, symSize: 0x24 }
+  - { offset: 0x522, size: 0x8, addend: 0x0, symName: _get_http_header_len, symObjAddr: 0x3AC, symBinAddr: 0x1000038E0, symSize: 0x98 }
+  - { offset: 0x574, size: 0x8, addend: 0x0, symName: _get_http_content_len, symObjAddr: 0x444, symBinAddr: 0x100003978, symSize: 0x178 }
+  - { offset: 0x63B, size: 0x8, addend: 0x0, symName: _print_header, symObjAddr: 0x5BC, symBinAddr: 0x100003AF0, symSize: 0x50 }
+  - { offset: 0x66D, size: 0x8, addend: 0x0, symName: _process_http_header, symObjAddr: 0x60C, symBinAddr: 0x100003B40, symSize: 0xD0 }
+...

@@ -55,8 +55,16 @@ int reopen_socket(const char *host, uint16_t port) {
     //          5. If we fall out of the loop, we are unable to connect, return
     //             -1 to indicate a failure. 
     //----------------------------------------------------------------------------
+    for (int i = 0; i < MAX_REOPEN_TRIES; i++) {
+        sock = socket_connect(host, port);   // attempt to connect
+        if (sock >= 0) {
+            return sock;                     // success, return socket
+        }
+        fprintf(stderr, "Reopen attempt %d failed. Retrying...\n", i + 1);
+        sleep(1);                            // brief delay before next attempt
+    }
 
-    
+    // If all attempts failed, return -1 to indicate failure
     return -1;
 }
 
@@ -96,9 +104,16 @@ int submit_request(int sock, const char *host, uint16_t port, char *resource){
         //  2. Assuming you got a valid socket, reissue the send again
         //     sent_bytes = send(sock, req, send_sz,0);
         //----------------------------------------------------------------------------
-        
-        return -1;  //remove this line of code, i just want this to compile so the
-                    //block of code needs at least one line
+        sock = reopen_socket(host, port);    // attempt to reopen socket
+        if (sock < 0) {
+            return sock;                     // return failure if cannot reopen
+        }
+        sent_bytes = send(sock, req, send_sz, 0);  // resend request
+        if (sent_bytes < 0) {
+            perror("send failed after reconnect attempt");
+            close(sock);
+            return -1;
+        }
     }
 
     //This should not happen, but just checking if we didnt send everything and 
@@ -136,7 +151,11 @@ int submit_request(int sock, const char *host, uint16_t port, char *resource){
     //          a. close the socket -- close(sock)
     //          b. return -1 to exit this function
     //--------------------------------------------------------------------------------
-    int header_len = 0;     //change this to get the header len as per the directions above
+    int header_len = get_http_header_len(recv_buff, bytes_recvd);
+    if (header_len < 0) {
+        close(sock);
+        return -1;  // failed to find valid header
+    }
     
 
     //--------------------------------------------------------------------------------
@@ -148,7 +167,7 @@ int submit_request(int sock, const char *host, uint16_t port, char *resource){
     // cannot find a Content-Length header, its assumed as per the HTTP spec that ther
     // is no body, AKA, content_len is zero;
     //--------------------------------------------------------------------------------
-    int content_len = 0;    //Change this to get the content length
+    int content_len = get_http_content_len(recv_buff, header_len);
 
     //--------------------------------------------------------------------------------
     // TODO:  Make sure you understand the calculations below
@@ -177,13 +196,18 @@ int submit_request(int sock, const char *host, uint16_t port, char *resource){
         //      a. close the socket (sock)
         //      b. return -1 to indicate an error
         //-----------------------------------------------------------------------------
-        bytes_recvd = 0; // replace with a valid recv(...); call
+        bytes_recvd = recv(sock, recv_buff, sizeof(recv_buff), 0);
+        if (bytes_recvd < 0) {
+            perror("recv failed");
+            close(sock);
+            return -1;
+        }
         
         //You can uncomment out the fprintf() calls below to see what is going on
 
-        //fprintf(stdout, "%.*s", bytes_recvd, recv_buff);
+        fprintf(stdout, "%.*s", bytes_recvd, recv_buff);
         total_bytes += bytes_recvd;
-        //fprintf(stdout, "remaining %d, received %d\n", bytes_remaining, bytes_recvd);
+        fprintf(stdout, "remaining %d, received %d\n", bytes_remaining, bytes_recvd);
         bytes_remaining -= bytes_recvd;
     }
 
@@ -200,6 +224,9 @@ int submit_request(int sock, const char *host, uint16_t port, char *resource){
     // point returns an active socket.
     //
     // YOUR ANSWER:  <START-YOUR-RESPONSE-HERE>
+    // If we reach this point, we return an active socket because the connection
+    // remains open (HTTP Keep-Alive). The same socket can be reused for
+    // subsequent requests to the same host and port.
     //
     //--------------------------------------------------------------------------------
     return sock;
