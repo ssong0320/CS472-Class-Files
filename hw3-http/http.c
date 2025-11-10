@@ -75,6 +75,17 @@ char *strnstr(const char *s, const char *find, size_t slen)
 }
 
 
+// Creates and connects a TCP socket to a specified host and port. The function 
+// resolves the hostname using the gethostbyname() function, then sets up
+// a sockaddr_in structure with the resolved IP address and port number.
+// It creates a stream socket (PF_INET, SOCK_STREAM) and connects to the
+// remote host using connect(). If any step fails, an error message is
+// printed and the socket is closed.
+// Returns:
+// - socket file descriptor on success
+// - -1 if socket or connect() fails
+// - -2 if host lookup fails
+
 int socket_connect(const char *host, uint16_t port){
     struct hostent *hp;
     struct sockaddr_in addr;
@@ -105,7 +116,14 @@ int socket_connect(const char *host, uint16_t port){
     return sock;
 }
 
-
+//Determines the ttal length of the HTTP header section in a recieved http response bufffer.
+// it searches for the header terminator sequecne \r\n\r\n (HTTP_HEADER_END), whcihc signifies the end 
+// of the header and start of the body. The function uses the strnstr() helper to search for termiantor
+// If found, the header length is calculated by taking distance from the start of buffer to end of the 
+// terminator sequence. If not found, the function returns -1
+// Returns:
+// - Total header length in bytes (including "\r\n\r\n") on success
+// - -1 if the end of the HTTP header cannot be found
 int get_http_header_len(char *http_buff, int http_buff_len){
     char *end_ptr;
     int header_len = 0;
@@ -121,7 +139,14 @@ int get_http_header_len(char *http_buff, int http_buff_len){
     return header_len;
 }
 
-
+// Extracts and returns the value of the content length header field from the http header section
+// of the response. Fucntion scans through the buffer up to http_header_len bytes, copies each
+// header line into a temp string using sscanf, then performs a search for the header Content_Length (CL_HEADER)
+// When a match is found, the function locates the : delimiter, extracts the value, and converts it to interger. 
+// This value represents the # of bytes in the message body. If not found, the function returns 0 and prints an error message.
+// Returns:
+// - Integer value of the Content-Length header if found
+// - 0 if not found or header is missing
 int get_http_content_len(char *http_buff, int http_header_len){
     char header_line[MAX_HEADER_LINE];
 

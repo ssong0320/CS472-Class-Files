@@ -177,6 +177,11 @@ int submit_request(int sock, const char *host, uint16_t port, char *resource){
     // from the server
     //
     // YOUR ANSWER:  <START-YOUR-RESPONSE-HERE>
+    // header_len tells us how many bytes belong to the header, so (bytes_recvd - header_len)
+    // calculates how many body buytes were already recieved, that is stored in inital_data.
+    //The content_len - initial_data gives us how many byes of the body are still left to be 
+    // recieved from the server. This lets the program keep track of how much more data it 
+    // needs to receive in the loop.
     //
     //--------------------------------------------------------------------------------
     int initial_data =  bytes_recvd - header_len;
@@ -226,7 +231,9 @@ int submit_request(int sock, const char *host, uint16_t port, char *resource){
     // YOUR ANSWER:  <START-YOUR-RESPONSE-HERE>
     // If we reach this point, we return an active socket because the connection
     // remains open (HTTP Keep-Alive). The same socket can be reused for
-    // subsequent requests to the same host and port.
+    // subsequent requests to the same host and port. Returning the active socket allows the calling main fucntion to send
+    // additional HTTP requests over the same connection without reopening
+    // a new socket each time. This improves efficiency and reduces connection overhead.
     //
     //--------------------------------------------------------------------------------
     return sock;
