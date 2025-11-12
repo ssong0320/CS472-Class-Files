@@ -91,22 +91,25 @@ int socket_connect(const char *host, uint16_t port){
     struct sockaddr_in addr;
     int sock;
 
+    // resolve hostname to IP address
     if((hp = gethostbyname(host)) == NULL){
 		herror("gethostbyname");
 		return -2;
 	}
     
-    
+    // configure address structure
 	bcopy(hp->h_addr_list[0], &addr.sin_addr, hp->h_length);
 	addr.sin_port = htons(port);
 	addr.sin_family = AF_INET;
 	sock = socket(PF_INET, SOCK_STREAM, 0); 
 	
+    // Create TCP socket
 	if(sock == -1){
 		perror("socket");
 		return -1;
 	}
 
+    // attempt connection to remote server
     if(connect(sock, (struct sockaddr *)&addr, sizeof(struct sockaddr_in)) == -1){
 		perror("connect");
 		close(sock);
@@ -127,13 +130,14 @@ int socket_connect(const char *host, uint16_t port){
 int get_http_header_len(char *http_buff, int http_buff_len){
     char *end_ptr;
     int header_len = 0;
+    // Look for header terminator (\r\n\r\n)
     end_ptr = strnstr(http_buff,HTTP_HEADER_END,http_buff_len);
 
     if (end_ptr == NULL) {
         fprintf(stderr, "Could not find the end of the HTTP header\n");
         return -1;
     }
-
+    // Compute byte offset from buffer start to end of header section
     header_len = (end_ptr - http_buff) + strlen(HTTP_HEADER_END);
 
     return header_len;
@@ -152,13 +156,14 @@ int get_http_content_len(char *http_buff, int http_header_len){
 
     char *next_header_line = http_buff;
     char *end_header_buff = http_buff + http_header_len;
-
+    // Iterate over header lines
     while (next_header_line < end_header_buff){
         bzero(header_line,sizeof(header_line));
         sscanf(next_header_line,"%[^\r\n]s", header_line);
-
+        // Check if current line contains Content Length
         char *isCLHeader = strcasestr(header_line,CL_HEADER);
         if(isCLHeader != NULL){
+            // Find ':' delimiter and extract value
             char *header_value_start = strchr(header_line, HTTP_HEADER_DELIM);
             if (header_value_start != NULL){
                 char *header_value = header_value_start + 1;
@@ -166,8 +171,10 @@ int get_http_content_len(char *http_buff, int http_header_len){
                 return content_len;
             }
         }
+        // move pointer to start of next line
         next_header_line += strlen(header_line) + strlen(HTTP_HEADER_EOL);
     }
+    // If not 'Content-Length
     fprintf(stderr,"Did not find content length\n");
     return 0;
 }
