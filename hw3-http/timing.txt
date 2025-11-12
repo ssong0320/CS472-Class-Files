@@ -1,0 +1,22 @@
+make run-cc
+1. Program runtime: 3.641387 seconds
+2. Program runtime: 8.502705 seconds
+3. Program runtime: 26.536539 seconds
+4. Program runtime: 2.037059 seconds
+5. Program runtime: 1.575294 seconds
+
+
+make run-ka
+1. Program runtime: 1.653863 seconds
+2. Program runtime: 0.192106 seconds
+3. Program runtime: 2.291679 seconds
+4. Program runtime: 14.348464 seconds
+5. Program runtime: 0.144767 seconds
+
+The Keep-Alive implementation performed faster overall because it reused the same TCP
+connection for multiple HTTP requests, avoiding the cost of repeated handshakes that
+occur with Connection: Close. Some variance was observed due to Internet latency,
+but the average runtime confirms that persistent connections generally reduce total
+transfer time and improve efficiency.
+
+

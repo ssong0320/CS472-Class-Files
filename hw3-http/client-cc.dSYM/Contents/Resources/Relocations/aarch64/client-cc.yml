@@ -2,20 +2,20 @@
 triple:          'arm64-apple-darwin'
 binary-path:     client-cc
 relocations:
-  - { offset: 0x26, size: 0x8, addend: 0x0, symName: _generate_cc_request, symObjAddr: 0x0, symBinAddr: 0x100003170, symSize: 0x11C }
-  - { offset: 0x33, size: 0x8, addend: 0x0, symName: _generate_cc_request, symObjAddr: 0x0, symBinAddr: 0x100003170, symSize: 0x11C }
-  - { offset: 0x58, size: 0x8, addend: 0x0, symName: _generate_cc_request.req, symObjAddr: 0x12C0, symBinAddr: 0x100008000, symSize: 0x0 }
+  - { offset: 0x26, size: 0x8, addend: 0x0, symName: _generate_cc_request, symObjAddr: 0x0, symBinAddr: 0x1000030D4, symSize: 0x11C }
+  - { offset: 0x33, size: 0x8, addend: 0x0, symName: _generate_cc_request, symObjAddr: 0x0, symBinAddr: 0x1000030D4, symSize: 0x11C }
+  - { offset: 0x58, size: 0x8, addend: 0x0, symName: _generate_cc_request.req, symObjAddr: 0x15C3, symBinAddr: 0x100008000, symSize: 0x0 }
   - { offset: 0xC1, size: 0x8, addend: 0x0, symName: _recv_buff, symBinAddr: 0x100008200, symSize: 0x0 }
-  - { offset: 0xDC, size: 0x8, addend: 0x0, symName: _print_usage, symObjAddr: 0x11C, symBinAddr: 0x10000328C, symSize: 0x70 }
-  - { offset: 0x100, size: 0x8, addend: 0x0, symName: _process_request, symObjAddr: 0x18C, symBinAddr: 0x1000032FC, symSize: 0x160 }
-  - { offset: 0x18A, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x2EC, symBinAddr: 0x10000345C, symSize: 0x1A8 }
-  - { offset: 0x28D, size: 0x8, addend: 0x0, symName: _strcasestr, symObjAddr: 0x0, symBinAddr: 0x100003604, symSize: 0xF4 }
-  - { offset: 0x2E8, size: 0x8, addend: 0x0, symName: _strcasestr, symObjAddr: 0x0, symBinAddr: 0x100003604, symSize: 0xF4 }
-  - { offset: 0x348, size: 0x8, addend: 0x0, symName: _strnstr, symObjAddr: 0xF4, symBinAddr: 0x1000036F8, symSize: 0x124 }
-  - { offset: 0x3B6, size: 0x8, addend: 0x0, symName: _socket_connect, symObjAddr: 0x218, symBinAddr: 0x10000381C, symSize: 0x170 }
-  - { offset: 0x416, size: 0x8, addend: 0x0, symName: __OSSwapInt16, symObjAddr: 0x388, symBinAddr: 0x10000398C, symSize: 0x24 }
-  - { offset: 0x43E, size: 0x8, addend: 0x0, symName: _get_http_header_len, symObjAddr: 0x3AC, symBinAddr: 0x1000039B0, symSize: 0x98 }
-  - { offset: 0x490, size: 0x8, addend: 0x0, symName: _get_http_content_len, symObjAddr: 0x444, symBinAddr: 0x100003A48, symSize: 0x178 }
-  - { offset: 0x557, size: 0x8, addend: 0x0, symName: _print_header, symObjAddr: 0x5BC, symBinAddr: 0x100003BC0, symSize: 0x50 }
-  - { offset: 0x589, size: 0x8, addend: 0x0, symName: _process_http_header, symObjAddr: 0x60C, symBinAddr: 0x100003C10, symSize: 0xD0 }
+  - { offset: 0xDC, size: 0x8, addend: 0x0, symName: _print_usage, symObjAddr: 0x11C, symBinAddr: 0x1000031F0, symSize: 0x70 }
+  - { offset: 0x100, size: 0x8, addend: 0x0, symName: _process_request, symObjAddr: 0x18C, symBinAddr: 0x100003260, symSize: 0x160 }
+  - { offset: 0x18A, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x2EC, symBinAddr: 0x1000033C0, symSize: 0x20C }
+  - { offset: 0x300, size: 0x8, addend: 0x0, symName: _strcasestr, symObjAddr: 0x0, symBinAddr: 0x1000035CC, symSize: 0xF4 }
+  - { offset: 0x35B, size: 0x8, addend: 0x0, symName: _strcasestr, symObjAddr: 0x0, symBinAddr: 0x1000035CC, symSize: 0xF4 }
+  - { offset: 0x3BB, size: 0x8, addend: 0x0, symName: _strnstr, symObjAddr: 0xF4, symBinAddr: 0x1000036C0, symSize: 0x124 }
+  - { offset: 0x429, size: 0x8, addend: 0x0, symName: _socket_connect, symObjAddr: 0x218, symBinAddr: 0x1000037E4, symSize: 0x170 }
+  - { offset: 0x489, size: 0x8, addend: 0x0, symName: __OSSwapInt16, symObjAddr: 0x388, symBinAddr: 0x100003954, symSize: 0x24 }
+  - { offset: 0x4B1, size: 0x8, addend: 0x0, symName: _get_http_header_len, symObjAddr: 0x3AC, symBinAddr: 0x100003978, symSize: 0x98 }
+  - { offset: 0x503, size: 0x8, addend: 0x0, symName: _get_http_content_len, symObjAddr: 0x444, symBinAddr: 0x100003A10, symSize: 0x178 }
+  - { offset: 0x5CA, size: 0x8, addend: 0x0, symName: _print_header, symObjAddr: 0x5BC, symBinAddr: 0x100003B88, symSize: 0x50 }
+  - { offset: 0x5FC, size: 0x8, addend: 0x0, symName: _process_http_header, symObjAddr: 0x60C, symBinAddr: 0x100003BD8, symSize: 0xD0 }
 ...
